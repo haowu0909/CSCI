@@ -1,0 +1,28 @@
+==1927== Memcheck, a memory error detector
+==1927== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==1927== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==1927== Command: ./test_read_deltas
+==1927== 
+========================================
+PROBLEM 1 read_deltas.c tests
+TEST  1       text-5 :   read_text_deltas()  len=  5 : OK
+TEST  2     text-128 :   read_text_deltas()  len= 32 : OK
+TEST  3     text-one :   read_text_deltas()  len=  1 : OK
+TEST  4   text-empty :   read_text_deltas()  len= -4 : OK
+TEST  5 text-missing :   read_text_deltas()  len= -8 : OK
+TEST  6        int-5 :    read_int_deltas()  len=  5 : OK
+TEST  7      int-128 :    read_int_deltas()  len= 32 : OK
+TEST  8      int-one :    read_int_deltas()  len=  1 : OK
+TEST  9    int-empty :    read_int_deltas()  len= -4 : OK
+TEST 10  int-missing :    read_int_deltas()  len= -8 : OK
+========================================
+RESULTS: 10 / 10 tests passed
+==1927== 
+==1927== HEAP SUMMARY:
+==1927==     in use at exit: 0 bytes in 0 blocks
+==1927==   total heap usage: 38 allocs, 38 frees, 140,208 bytes allocated
+==1927== 
+==1927== All heap blocks were freed -- no leaks are possible
+==1927== 
+==1927== For counts of detected and suppressed errors, rerun with: -v
+==1927== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

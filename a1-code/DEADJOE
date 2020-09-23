@@ -1,0 +1,12 @@
+
+*** These modified files were found in JOE when it aborted on Mon Sep 23 08:05:00 2019
+*** JOE was aborted by UNIX signal 1
+
+*** File '(Unnamed)'
+/home/wu000520/Desktop/a1-code/Makefile
+
+*** File '* Startup Log *'
+Processing '/etc/joe/jstarrc'...
+Processing '/etc/joe/ftyperc'...
+Finished processing /etc/joe/ftyperc
+Finished processing /etc/joe/jstarrc

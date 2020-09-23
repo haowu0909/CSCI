@@ -1,0 +1,37 @@
+> cp test-input/globals test-data/globals2			> cp test-input/globals test-data/globals2
+> test-data/globals2						> test-data/globals2
+string1: Hello						      |	bash: line 1: test-data/globals2: cannot execute binary file
+string2: Goodbye cruel world				      <
+string3: All your bass					      <
+int1: aabbccdd						      <
+int2: ffeeddcc						      <
+a_doub: 1.234567					      <
+> ./patchsym test-data/globals2 string1 string 'Adios, muchac	> ./patchsym test-data/globals2 string1 string 'Adios, muchac
+SET mode						      |	bash: line 2: ./patchsym: cannot execute binary file
+.data section						      <
+- 23 section index					      <
+- 12320 bytes offset from start of file			      <
+- 0x4020 preferred virtual address for .data		      <
+.symtab section						      <
+- 26 section index					      <
+- 12504 bytes offset from start of file			      <
+- 1680 bytes total size					      <
+- 24 bytes per entry					      <
+- 70 entries						      <
+Found Symbol 'string1'					      <
+- 53 symbol index					      <
+- 0x4040 value						      <
+- 8 size						      <
+- 23 section index					      <
+- 32 offset in .data of value for symbol		      <
+string value: 'Hello'					      <
+ERROR: Cannot change symbol 'string1': existing size too smal <
+Cur Size: 8 'Hello'					      <
+New Size: 29 'Adios, muchachos. Lo siento.'		      <
+> test-data/globals2						> test-data/globals2
+string1: Hello						      |	bash: line 3: test-data/globals2: cannot execute binary file
+string2: Goodbye cruel world				      <
+string3: All your bass					      <
+int1: aabbccdd						      <
+int2: ffeeddcc						      <
+a_doub: 1.234567					      <

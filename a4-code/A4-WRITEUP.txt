@@ -1,0 +1,299 @@
+____________
+
+ A4 WRITEUP
+____________
+
+
+- Name: (Hao Wu)
+- NetID: (wu000520@umn.edu)
+
+Answer the questions below according to the assignment
+specification. Write your answers directly in this text file and submit
+it along with your code.
+
+
+PROBLEM 1: optimized_matrix_trans_mult_vec()
+============================================
+
+Do your timing study on apollo.cselabs.umn.edu
+
+
+(A) Paste Source Code
+~~~~~~~~~~~~~~~~~~~~~
+
+Paste a copy of your source code for the function
+optimized_matrix_trans_mult_vec() below.
+
+#include "matvec.h"
+#include <stdlib.h>
+
+int optimized_matrix_trans_mult_vec(matrix_t mat, vector_t vec, vector_t res){
+  if(mat.rows != vec.len){
+    printf("mat.rows (%ld) != vec.len (%ld)\n",mat.rows,vec.len);
+    return 1;
+  }
+  if(mat.cols != res.len){
+    printf("mat.cols (%ld) != res.len (%ld)\n",mat.cols,res.len);
+    return 2;
+  }
+  for(int j=0; j<mat.rows; j++)
+    VSET(res,j,0); // initialize res[j] to zero
+
+  int n = mat.cols - 4;       // use for cleanup loop
+  for(int i=0; i<mat.rows; i++){
+    int veci = VGET(vec,i); //get vector elements
+    int j;
+    for(j=0; j<n; j+=4){
+      //get result vector elements
+      int resj = VGET(res,j);
+      int resj2 = VGET(res,j+1);
+      int resj3 = VGET(res,j+2);
+      int resj4 = VGET(res,j+3);
+      //get matrix elements
+      int elij = MGET(mat,i,j);
+      int elij2 = MGET(mat,i,j+1);
+      int elij3 = MGET(mat,i,j+2);
+      int elij4 = MGET(mat,i,j+3);
+
+
+      //update result
+      resj += elij * veci;
+      resj2 += elij2 * veci;
+      resj3 += elij3 * veci;
+      resj4 += elij4 * veci;
+      //store to vector
+      VSET(res,j, resj);
+      VSET(res,j+1, resj2);
+      VSET(res,j+2, resj3);
+      VSET(res,j+3, resj4);
+    }
+
+      //add on remain elements
+    for(; j < mat.cols; j++){
+
+      int resj = VGET(res,j);
+      int elij = MGET(mat,i,j);
+      resj += elij * veci;
+      VSET(res,j, resj);
+
+        }
+}
+
+
+
+  return 0;
+}
+
+(B) Timing on Apollo
+~~~~~~~~~~~~~~~~~~~~
+
+Paste a copy of the results of running `mult_bench' on
+apollo.cselabs.umn.edu in the space below which shows how your
+performance optimizations improved on the baseline codes.
+
+wu000520@csel-apollo:~/Desktop/a4-code$ ./mult_benchmark
+==== Matrix Mult Benchmark Version 2 ====
+  SIZE       BASE       NORM        OPT BSPDUP NSPDUP POINTS
+   512 8.2800e-04 5.7100e-04 2.4400e-04   3.39   2.34      2
+  1024 3.4400e-03 2.2680e-03 9.6900e-04   3.55   2.34      2
+  1101 3.4980e-03 2.6310e-03 1.1320e-03   3.09   2.32      2
+  2048 2.2264e-02 9.1190e-03 3.9770e-03   5.60   2.29      3
+  4096 1.6889e-01 3.6532e-02 1.5913e-02  10.61   2.30      6
+  8192 1.3065e+00 1.4657e-01 6.3656e-02  20.52   2.30     11
+RAW POINTS: 26
+TOTAL POINTS: 26 / 35
+
+
+//I got 42 points as RAW POINTS a few days ago. However, appllo is
+unstable today and that is why the score is lower.  (11/19)
+
+
+
+(C) Optimizations
+~~~~~~~~~~~~~~~~~
+
+Describe in some detail the optimizations you used to speed the code
+up.  THE CODE SHOULD CONTAIN SOME COMMENTS already to describe these
+but in the section below, describe in English the techniques you used
+to make the code run faster.  Format your descriptions into discrete
+chunks such as.
+Optimization 1: Reordering memory accesses to the matrix elements.
+The first loop iterates by matrix rows, and the second loop iterates
+by matrix column.
+This should make run faster because matrixs are stored in the memory
+row by row, so when processed an element (i, j) an element (i, j+1) is
+likely have been already read in the cache memory.
+
+Optimization 2: Increasing potential CPU pipeline by processing
+four matrix elements in the single loop iteration.
+This should make run faster because each loop iteration should
+totally clear CPU pipeline. Due to this optimization, while the first
+element of the matrix is being prepared for storage, the second one
+is processed and the third is loaded from the memory.
+
+Optimization 3: loop unrolling. using unrolling loops for unpredictable test.
+Use pipeline to processing first, then use cleanup loop to add on remaining
+elements.
+
+Optimization 4: It will run faster with creating local variables
+(e.g. int veci = VGET(vec,i); ). using local variables to save the time
+which would be used to go back main memory. 
+
+Full credit solutions will have a least two optimizations.
+
+
+PROBLEM 2: Timing Search Algorithms
+===================================
+
+Do your timing study on apollo.cselabs.umn.edu. In most cases, report
+times larger than 1e-03 seconds as times shorter than this are
+unreliable. Run searches for more repetitions to lengthen run times.
+
+
+(A) Min Size for Algorithmic Differences
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Determine the size of input array does one start to see a measurable
+difference in the performance of the linear and logarithmic
+algorithms.  Produce a timing table which includes all algorithms
+which clearly demonstrates an uptick in the times associated with some
+while others remain much lower.  Identify what size this appears to be
+a occur.
+
+wu000520@csel-apollo:~/Desktop/a4-code$ ./search_benchmark 5 15 10
+    LENGTH  SEARCHES       array        list      binary        tree
+        32       640   1.900e-05   2.300e-05   2.100e-05   1.100e-05
+        64      1280   6.000e-05   1.040e-04   2.500e-05   2.900e-05
+       128      2560   1.860e-04   3.830e-04   6.800e-05   8.000e-05
+       256      5120   6.220e-04   1.473e-03   2.070e-04   1.750e-04
+       512     10240   2.426e-03   5.803e-03   4.670e-04   3.800e-04
+      1024     20480   8.929e-03   2.817e-02   9.720e-04   8.250e-04
+      2048     40960   3.477e-02   2.947e-01   1.936e-03   1.775e-03
+      4096     81920   1.372e-01   1.561e+00   4.010e-03   3.847e-03
+      8192    163840   5.449e-01   9.318e+00   8.239e-03   8.436e-03
+     16384    327680   2.174e+00   6.804e+01   1.714e-02   1.850e-02
+
+
+Already at a data size of 512, logarithmic algorithms are more than
+10 times faster than linear
+
+
+(B) Linear Search in List vs Array
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Determine whether the linear array and linked list search remain
+approximately at the same performance level as size increases to large
+data or whether one begins to become favorable over other. Determine
+the approximate size at which this divergence becomes obvious. Discuss
+reasons WHY this difference arises.
+
+The linked list algorithm became slower then linear array one when
+when the data size approaches to 10000. This is explained by the fact
+that the linear array algorithm for operation accesses the memory cells
+sequentially, while for a linked list algorithm, logically adjacent
+data may be physically situated far from each other, which leads to
+delays in reading.
+
+
+(C) Binary Search in Tree vs Array
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Compare the binary array search and binary tree search on small to
+very large arrays. Determine if there is a size at which the
+performance of these two begins to diverge. If so, describe why this
+might be happening based on your understanding of the data structures
+and the memory system. If not, describe why you believe there is
+little performance difference between the two.
+
+wu000520@csel-apollo:~/Desktop/a4-code$ ./search_benchmark 5 25 5 bt
+    LENGTH  SEARCHES      binary        tree
+        32       320   9.000e-06   7.000e-06
+        64       640   1.900e-05   1.900e-05
+       128      1280   5.500e-05   4.300e-05
+       256      2560   1.140e-04   9.300e-05
+       512      5120   2.430e-04   1.980e-04
+      1024     10240   4.830e-04   4.180e-04
+      2048     20480   9.860e-04   8.900e-04
+      4096     40960   1.998e-03   1.933e-03
+      8192     81920   4.141e-03   4.189e-03
+     16384    163840   8.558e-03   9.191e-03
+     32768    327680   1.791e-02   2.020e-02
+     65536    655360   3.726e-02   3.788e-02
+    131072   1310720   7.782e-02   1.351e-01
+    262144   2621440   1.612e-01   2.936e-01
+    524288   5242880   3.341e-01   6.759e-01
+   1048576  10485760   6.942e-01   1.501e+00
+   2097152  20971520   1.429e+00   3.317e+00
+   4194304  41943040   2.940e+00   7.143e+00
+   8388608  83886080   6.048e+00   1.588e+01
+
+
+At data size is 8192, the binary array algorithm
+became faster the binary tree. This is because at the last stages
+of the binary array search, the data among which the search is
+performed can already be completely cached, or at least are
+in physical proximity to each other. For a binary tree however,
+as the algorithm progresses, the "radius" of the data among which
+the search is performed is not reduced.
+
+(D) Caching Effects on Algorithms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is commonly believed that memory systems that feature a Cache will
+lead to arrays performing faster than linked structures such as Linked
+Lists and Binary Search Trees. Describe whether your timings confirm
+or refute this belief.  Address both types of algorithms in your
+answer:
+- What effects does Cache have on Linear Search in arrays and lists
+and why?
+
+Cache increase speed of the algorithm for linear search especially for array
+. This is because the algorithm checks data sequentially, which with
+a high probability may get into the cache. the effect is smaller to link list
+because there is overhead for storing data in a linked list (you must store
+a pointer to the next element), which reduces the amount of data that can
+fit in the cache. In addition, the data in the linked list can be located not
+ in adjacent memory cells.
+
+- What effects does Cache have on Binary Search in arrays and trees
+and why?
+
+cache has little effect on the binary algorithms speed, as these algorithms
+check data from different places. Some effect may occur with a small size,
+when all the data is entirely placed in the cache. But on such sizes, binary
+algorithms work instantly anyway.
+
+
+
+(E) OPTIONAL MAKEUP CREDIT
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you decided to make use of a table of function pointers/structs
+which is worth makeup credit, describe your basic design for this
+below.
+
+First of all I have defined thre types for pointer on the generic functions.
+These function should recieve (or return in the case of creating function) pointer
+to some data structure as well as some other parameters.
+These type are:
+typedef int (*search_t)(void* , int, int);// A pointer to the search function
+typedef void* (*setup_t)(int);      // A pointer to the function which generate data
+typedef void (*cleanup_t)(void*);   // A pointer to cleaning function
+Then I have defined the structure which include all needed information about algorithm
+
+typedef struct searchalg_t_ {
+char description[50];   // Description of the algorithm
+char header[10];        // A short name of the algorithm which is used in result printing
+char symbol;            // A symbol which denoted the algorithm in a command line agument
+int enable;             // A boolean switch: 0 not use this algorithm
+search_t search_fun;
+setup_t setup_fun;
+cleanup_t cleanup_fun;
+} searchalg_t;
+
+Than in the main function I create an array contains structures.
+By default all algorithms are enable.
+After if ther is a command line argument which determin included algorithms, I clear all flags
+and than set ones only for algorithm desired.
+At the end when the program does benchmark loop through the table with algorithms and call the
+functions for selected algorithm through the pointers in that table.

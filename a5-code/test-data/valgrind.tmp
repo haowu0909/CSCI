@@ -1,0 +1,7 @@
+> cp test-input/globals test-data/globals2
+> test-data/globals2
+bash: line 1: test-data/globals2: cannot execute binary file
+> valgrind --leak-check=full --show-leak-kinds=all ./patchsym test-data/globals2 string1 string 'Adios, muchachos. Lo siento.'
+bash: line 2: valgrind: command not found
+> test-data/globals2
+bash: line 3: test-data/globals2: cannot execute binary file
